@@ -211,86 +211,65 @@ var _drop3 = _interopRequireDefault(_drop2);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+class Evented {
+  on(event, handler, ctx) {
+    const once = arguments.length <= 3 || arguments[3] === undefined ? false : arguments[3];
 
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+    if ((0, _isUndefined3.default)(this.bindings)) {
+      this.bindings = {};
+    }
 
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+    if ((0, _isUndefined3.default)(this.bindings[event])) {
+      this.bindings[event] = [];
+    }
 
-var Evented =
-/*#__PURE__*/
-exports.Evented = function () {
-  function Evented() {
-    _classCallCheck(this, Evented);
+    this.bindings[event].push({
+      handler,
+      ctx,
+      once
+    });
   }
 
-  _createClass(Evented, [{
-    key: "on",
-    value: function on(event, handler, ctx) {
-      var once = arguments.length <= 3 || arguments[3] === undefined ? false : arguments[3];
+  once(event, handler, ctx) {
+    this.on(event, handler, ctx, true);
+  }
 
-      if ((0, _isUndefined3.default)(this.bindings)) {
-        this.bindings = {};
-      }
+  off(event, handler) {
+    if ((0, _isUndefined3.default)(this.bindings) || (0, _isUndefined3.default)(this.bindings[event])) {
+      return false;
+    }
 
-      if ((0, _isUndefined3.default)(this.bindings[event])) {
-        this.bindings[event] = [];
-      }
-
-      this.bindings[event].push({
-        handler: handler,
-        ctx: ctx,
-        once: once
+    if ((0, _isUndefined3.default)(handler)) {
+      delete this.bindings[event];
+    } else {
+      this.bindings[event].forEach((binding, index) => {
+        if (binding.handler === handler) {
+          this.bindings[event].splice(index, 1);
+        }
       });
     }
-  }, {
-    key: "once",
-    value: function once(event, handler, ctx) {
-      this.on(event, handler, ctx, true);
-    }
-  }, {
-    key: "off",
-    value: function off(event, handler) {
-      var _this = this;
+  }
 
-      if ((0, _isUndefined3.default)(this.bindings) || (0, _isUndefined3.default)(this.bindings[event])) {
-        return false;
-      }
-
-      if ((0, _isUndefined3.default)(handler)) {
-        delete this.bindings[event];
-      } else {
-        this.bindings[event].forEach(function (binding, index) {
-          if (binding.handler === handler) {
-            _this.bindings[event].splice(index, 1);
-          }
-        });
-      }
-    }
-  }, {
-    key: "trigger",
-    value: function trigger(event) {
-      var _this2 = this;
-
-      if (!(0, _isUndefined3.default)(this.bindings) && this.bindings[event]) {
-        var args = (0, _drop3.default)(arguments);
-        this.bindings[event].forEach(function (binding, index) {
-          var ctx = binding.ctx,
+  trigger(event) {
+    if (!(0, _isUndefined3.default)(this.bindings) && this.bindings[event]) {
+      const args = (0, _drop3.default)(arguments);
+      this.bindings[event].forEach((binding, index) => {
+        const ctx = binding.ctx,
               handler = binding.handler,
               once = binding.once;
-          var context = ctx || _this2;
-          handler.apply(context, args);
+        const context = ctx || this;
+        handler.apply(context, args);
 
-          if (once) {
-            _this2.bindings[event].splice(index, 1);
-          }
-        });
-      }
+        if (once) {
+          this.bindings[event].splice(index, 1);
+        }
+      });
     }
-  }]);
+  }
 
-  return Evented;
-}();
+}
+
+exports.Evented = Evented;
 
 /***/ }),
 /* 4 */
@@ -442,32 +421,14 @@ var _utils = __webpack_require__(12);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
 /**
  * Creates incremented ID for each newly created step
  *
  * @private
  * @return {Number} The unique id for the step
  */
-var uniqueId = function () {
-  var id = 0;
+const uniqueId = function () {
+  let id = 0;
   return function () {
     return ++id;
   };
@@ -478,11 +439,7 @@ var uniqueId = function () {
  */
 
 
-var Step =
-/*#__PURE__*/
-exports.Step = function (_Evented) {
-  _inherits(Step, _Evented);
-
+class Step extends _evented.Evented {
   /**
    * Create a step
    * @param {Tour} tour The tour for the step
@@ -545,23 +502,18 @@ exports.Step = function (_Evented) {
    * ```
    * @return {Step} The newly created Step instance
    */
-  function Step(tour, options) {
-    var _this;
+  constructor(tour, options) {
+    super(tour, options);
+    this.tour = tour;
 
-    _classCallCheck(this, Step);
+    _bind.bindMethods.call(this, ['_show', 'cancel', 'complete', 'destroy', 'hide', 'isOpen', 'render', 'scrollTo', 'show']);
 
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(Step).call(this, tour, options));
-    _this.tour = tour;
-
-    _bind.bindMethods.call(_assertThisInitialized(_assertThisInitialized(_this)), ['_show', 'cancel', 'complete', 'destroy', 'hide', 'isOpen', 'render', 'scrollTo', 'show']);
-
-    _this.setOptions(options);
-
-    _this.bindAdvance = _bind.bindAdvance.bind(_assertThisInitialized(_assertThisInitialized(_this)));
-    _this.bindButtonEvents = _bind.bindButtonEvents.bind(_assertThisInitialized(_assertThisInitialized(_this)));
-    _this.bindCancelLink = _bind.bindCancelLink.bind(_assertThisInitialized(_assertThisInitialized(_this)));
-    _this.setupPopper = _utils.setupPopper.bind(_assertThisInitialized(_assertThisInitialized(_this)));
-    return _possibleConstructorReturn(_this, _assertThisInitialized(_assertThisInitialized(_this)));
+    this.setOptions(options);
+    this.bindAdvance = _bind.bindAdvance.bind(this);
+    this.bindButtonEvents = _bind.bindButtonEvents.bind(this);
+    this.bindCancelLink = _bind.bindCancelLink.bind(this);
+    this.setupPopper = _utils.setupPopper.bind(this);
+    return this;
   }
   /**
    * Adds buttons to the step as passed into options
@@ -571,399 +523,368 @@ exports.Step = function (_Evented) {
    */
 
 
-  _createClass(Step, [{
-    key: "_addButtons",
-    value: function _addButtons(content) {
-      var _this2 = this;
+  _addButtons(content) {
+    if (this.options.buttons) {
+      const footer = document.createElement('footer');
+      const buttons = (0, _utils.createFromHTML)('<ul class="shepherd-buttons"></ul>');
+      footer.classList.add('shepherd-footer');
+      this.options.buttons.map(cfg => {
+        const button = (0, _utils.createFromHTML)(`<li><a class="shepherd-button ${cfg.classes || ''}">${cfg.text}</a>`);
+        buttons.appendChild(button);
+        this.bindButtonEvents(cfg, button.querySelector('a'));
+      });
+      footer.appendChild(buttons);
+      content.appendChild(footer);
+    }
+  }
+  /**
+   * Adds the "x" button to cancel the tour
+   * @param {HTMLElement} element The step element
+   * @param {HTMLElement} header The header element for the step
+   * @private
+   */
 
-      if (this.options.buttons) {
-        var footer = document.createElement('footer');
-        var buttons = (0, _utils.createFromHTML)('<ul class="shepherd-buttons"></ul>');
-        footer.classList.add('shepherd-footer');
-        this.options.buttons.map(function (cfg) {
-          var button = (0, _utils.createFromHTML)("<li><a class=\"shepherd-button ".concat(cfg.classes || '', "\">").concat(cfg.text, "</a>"));
-          buttons.appendChild(button);
 
-          _this2.bindButtonEvents(cfg, button.querySelector('a'));
-        });
-        footer.appendChild(buttons);
-        content.appendChild(footer);
+  _addCancelLink(element, header) {
+    if (this.options.showCancelLink) {
+      const link = (0, _utils.createFromHTML)('<a href class="shepherd-cancel-link"></a>');
+      header.appendChild(link);
+      element.classList.add('shepherd-has-cancel-link');
+      this.bindCancelLink(link);
+    }
+  }
+  /**
+   * Adds text passed in as options
+   *
+   * @private
+   * @param {HTMLElement} content The content to append the text to
+   */
+
+
+  _addContent(content) {
+    const text = (0, _utils.createFromHTML)('<div class="shepherd-text"></div>');
+    let paragraphs = this.options.text;
+
+    if ((0, _isFunction3.default)(paragraphs)) {
+      paragraphs = paragraphs.call(this, text);
+    }
+
+    if (paragraphs instanceof HTMLElement) {
+      text.appendChild(paragraphs);
+    } else {
+      if ((0, _isString3.default)(paragraphs)) {
+        paragraphs = [paragraphs];
+      }
+
+      paragraphs.map(paragraph => {
+        text.innerHTML += `<p>${paragraph}</p>`;
+      });
+    }
+
+    content.appendChild(text);
+  }
+  /**
+   * Attaches final element to default or passed location
+   *
+   * @private
+   * @param {HTMLElement} element The element to attach
+   */
+
+
+  _attach(element) {
+    const renderLocation = this.options.renderLocation;
+
+    if (renderLocation) {
+      if (renderLocation instanceof HTMLElement) {
+        return renderLocation.appendChild(element);
+      }
+
+      if ((0, _isString3.default)(renderLocation)) {
+        return document.querySelector(renderLocation).appendChild(element);
       }
     }
-    /**
-     * Adds the "x" button to cancel the tour
-     * @param {HTMLElement} element The step element
-     * @param {HTMLElement} header The header element for the step
-     * @private
-     */
 
-  }, {
-    key: "_addCancelLink",
-    value: function _addCancelLink(element, header) {
-      if (this.options.showCancelLink) {
-        var link = (0, _utils.createFromHTML)('<a href class="shepherd-cancel-link"></a>');
-        header.appendChild(link);
-        element.classList.add('shepherd-has-cancel-link');
-        this.bindCancelLink(link);
+    return document.body.appendChild(element);
+  }
+  /**
+   * Creates Shepherd element for step based on options
+   *
+   * @private
+   * @return {HTMLElement} The DOM element for the step
+   */
+
+
+  _createElement() {
+    const content = document.createElement('div');
+    const classes = this.options.classes || '';
+    const element = (0, _utils.createFromHTML)(`<div class='${classes}' data-id='${this.id}' id="${this.options.idAttribute}"}>`);
+    const header = document.createElement('header');
+
+    if (this.options.title) {
+      const title = document.createElement('h3');
+      title.classList.add('shepherd-title');
+      title.innerHTML = `${this.options.title}`;
+      header.prepend(title);
+      element.classList.add('shepherd-has-title');
+    }
+
+    content.classList.add('shepherd-content');
+    header.classList.add('shepherd-header');
+    element.appendChild(content);
+    content.appendChild(header);
+
+    if (this.options.attachTo) {
+      element.appendChild((0, _utils.createFromHTML)('<div class="popper__arrow" x-arrow></div>'));
+    }
+
+    if (!(0, _isUndefined3.default)(this.options.text)) {
+      this._addContent(content);
+    }
+
+    this._addButtons(content);
+
+    this._addCancelLink(element, header);
+
+    return element;
+  }
+  /**
+   * Returns the tour for the step
+   * @return {Tour} The tour instance
+   */
+
+
+  getTour() {
+    return this.tour;
+  }
+  /**
+   * Passes `options.attachTo` to `parsePosition` to get the correct `attachTo` format
+   * @returns {({} & {element, on}) | ({})}
+   */
+
+
+  getAttachTo() {
+    const opts = (0, _utils.parsePosition)(this.options.attachTo) || {};
+    const returnOpts = Object.assign({}, opts);
+
+    if ((0, _isString3.default)(opts.element)) {
+      // Can't override the element in user opts reference because we can't
+      // guarantee that the element will exist in the future.
+      try {
+        returnOpts.element = document.querySelector(opts.element);
+      } catch (e) {// TODO
+      }
+
+      if (!returnOpts.element) {
+        console.error(`The element for this Shepherd step was not found ${opts.element}`);
       }
     }
-    /**
-     * Adds text passed in as options
-     *
-     * @private
-     * @param {HTMLElement} content The content to append the text to
-     */
 
-  }, {
-    key: "_addContent",
-    value: function _addContent(content) {
-      var text = (0, _utils.createFromHTML)('<div class="shepherd-text"></div>');
-      var paragraphs = this.options.text;
+    return returnOpts;
+  }
+  /**
+   * Cancel the tour
+   * Triggers the `cancel` event
+   */
 
-      if ((0, _isFunction3.default)(paragraphs)) {
-        paragraphs = paragraphs.call(this, text);
-      }
 
-      if (paragraphs instanceof HTMLElement) {
-        text.appendChild(paragraphs);
-      } else {
-        if ((0, _isString3.default)(paragraphs)) {
-          paragraphs = [paragraphs];
-        }
+  cancel() {
+    this.tour.cancel();
+    this.trigger('cancel');
+  }
+  /**
+   * Complete the tour
+   * Triggers the `complete` event
+   */
 
-        paragraphs.map(function (paragraph) {
-          text.innerHTML += "<p>".concat(paragraph, "</p>");
-        });
-      }
 
-      content.appendChild(text);
+  complete() {
+    this.tour.complete();
+    this.trigger('complete');
+  }
+  /**
+   * Remove the step, delete the step's element, and destroy the popper for the step
+   * Triggers `destroy` event
+   */
+
+
+  destroy() {
+    if ((0, _isElement3.default)(this.el) && this.el.parentNode) {
+      this.el.parentNode.removeChild(this.el);
+      delete this.el;
     }
-    /**
-     * Attaches final element to default or passed location
-     *
-     * @private
-     * @param {HTMLElement} element The element to attach
-     */
 
-  }, {
-    key: "_attach",
-    value: function _attach(element) {
-      var renderLocation = this.options.renderLocation;
-
-      if (renderLocation) {
-        if (renderLocation instanceof HTMLElement) {
-          return renderLocation.appendChild(element);
-        }
-
-        if ((0, _isString3.default)(renderLocation)) {
-          return document.querySelector(renderLocation).appendChild(element);
-        }
-      }
-
-      return document.body.appendChild(element);
+    if (this.popper) {
+      this.popper.destroy();
     }
-    /**
-     * Creates Shepherd element for step based on options
-     *
-     * @private
-     * @return {HTMLElement} The DOM element for the step
-     */
 
-  }, {
-    key: "_createElement",
-    value: function _createElement() {
-      var content = document.createElement('div');
-      var classes = this.options.classes || '';
-      var element = (0, _utils.createFromHTML)("<div class='".concat(classes, "' data-id='").concat(this.id, "' id=\"").concat(this.options.idAttribute, "\"}>"));
-      var header = document.createElement('header');
+    this.popper = null;
+    this.trigger('destroy');
+  }
+  /**
+   * Hide the step and destroy the popper
+   */
 
-      if (this.options.title) {
-        var title = document.createElement('h3');
-        title.classList.add('shepherd-title');
-        title.innerHTML = "".concat(this.options.title);
-        header.prepend(title);
-        element.classList.add('shepherd-has-title');
-      }
 
-      content.classList.add('shepherd-content');
-      header.classList.add('shepherd-header');
-      element.appendChild(content);
-      content.appendChild(header);
+  hide() {
+    this.trigger('before-hide');
 
-      if (this.options.attachTo) {
-        element.appendChild((0, _utils.createFromHTML)('<div class="popper__arrow" x-arrow></div>'));
-      }
+    if (this.el) {
+      this.el.hidden = true; // We need to manually set styles for < IE11 support
 
-      if (!(0, _isUndefined3.default)(this.options.text)) {
-        this._addContent(content);
-      }
-
-      this._addButtons(content);
-
-      this._addCancelLink(element, header);
-
-      return element;
+      this.el.style.display = 'none';
     }
-    /**
-     * Returns the tour for the step
-     * @return {Tour} The tour instance
-     */
 
-  }, {
-    key: "getTour",
-    value: function getTour() {
-      return this.tour;
+    document.body.removeAttribute('data-shepherd-step');
+
+    if (this.target) {
+      this.target.classList.remove('shepherd-enabled', 'shepherd-target');
     }
-    /**
-     * Passes `options.attachTo` to `parsePosition` to get the correct `attachTo` format
-     * @returns {({} & {element, on}) | ({})}
-     */
 
-  }, {
-    key: "getAttachTo",
-    value: function getAttachTo() {
-      var opts = (0, _utils.parsePosition)(this.options.attachTo) || {};
-      var returnOpts = Object.assign({}, opts);
-
-      if ((0, _isString3.default)(opts.element)) {
-        // Can't override the element in user opts reference because we can't
-        // guarantee that the element will exist in the future.
-        try {
-          returnOpts.element = document.querySelector(opts.element);
-        } catch (e) {// TODO
-        }
-
-        if (!returnOpts.element) {
-          console.error("The element for this Shepherd step was not found ".concat(opts.element));
-        }
-      }
-
-      return returnOpts;
+    if (this.popper) {
+      this.popper.destroy();
     }
-    /**
-     * Cancel the tour
-     * Triggers the `cancel` event
-     */
 
-  }, {
-    key: "cancel",
-    value: function cancel() {
-      this.tour.cancel();
-      this.trigger('cancel');
+    this.popper = null;
+    this.trigger('hide');
+  }
+  /**
+   * Check if the step is open and visible
+   * @return {*|boolean} True if the step is open and visible
+   */
+
+
+  isOpen() {
+    return this.el && !this.el.hidden;
+  }
+  /**
+   * Create the element and set up the popper instance
+   */
+
+
+  render() {
+    if (!(0, _isUndefined3.default)(this.el)) {
+      this.destroy();
     }
-    /**
-     * Complete the tour
-     * Triggers the `complete` event
-     */
 
-  }, {
-    key: "complete",
-    value: function complete() {
-      this.tour.complete();
-      this.trigger('complete');
+    this.el = this._createElement();
+
+    if (this.options.advanceOn) {
+      this.bindAdvance();
     }
-    /**
-     * Remove the step, delete the step's element, and destroy the popper for the step
-     * Triggers `destroy` event
-     */
 
-  }, {
-    key: "destroy",
-    value: function destroy() {
-      if ((0, _isElement3.default)(this.el) && this.el.parentNode) {
-        this.el.parentNode.removeChild(this.el);
-        delete this.el;
-      }
+    this._attach(this.el);
 
-      if (this.popper) {
-        this.popper.destroy();
-      }
+    this.setupPopper();
+  }
+  /**
+   * If a custom scrollToHandler is defined, call that, otherwise do the generic
+   * scrollIntoView call.
+   */
 
-      this.popper = null;
-      this.trigger('destroy');
-    }
-    /**
-     * Hide the step and destroy the popper
-     */
 
-  }, {
-    key: "hide",
-    value: function hide() {
-      this.trigger('before-hide');
-
-      if (this.el) {
-        this.el.hidden = true; // We need to manually set styles for < IE11 support
-
-        this.el.style.display = 'none';
-      }
-
-      document.body.removeAttribute('data-shepherd-step');
-
-      if (this.target) {
-        this.target.classList.remove('shepherd-enabled', 'shepherd-target');
-      }
-
-      if (this.popper) {
-        this.popper.destroy();
-      }
-
-      this.popper = null;
-      this.trigger('hide');
-    }
-    /**
-     * Check if the step is open and visible
-     * @return {*|boolean} True if the step is open and visible
-     */
-
-  }, {
-    key: "isOpen",
-    value: function isOpen() {
-      return this.el && !this.el.hidden;
-    }
-    /**
-     * Create the element and set up the popper instance
-     */
-
-  }, {
-    key: "render",
-    value: function render() {
-      if (!(0, _isUndefined3.default)(this.el)) {
-        this.destroy();
-      }
-
-      this.el = this._createElement();
-
-      if (this.options.advanceOn) {
-        this.bindAdvance();
-      }
-
-      this._attach(this.el);
-
-      this.setupPopper();
-    }
-    /**
-     * If a custom scrollToHandler is defined, call that, otherwise do the generic
-     * scrollIntoView call.
-     */
-
-  }, {
-    key: "scrollTo",
-    value: function scrollTo() {
-      var _this$getAttachTo = this.getAttachTo(),
+  scrollTo() {
+    const _this$getAttachTo = this.getAttachTo(),
           element = _this$getAttachTo.element;
 
-      if ((0, _isFunction3.default)(this.options.scrollToHandler)) {
-        this.options.scrollToHandler(element);
-      } else if ((0, _isElement3.default)(element)) {
-        element.scrollIntoView();
+    if ((0, _isFunction3.default)(this.options.scrollToHandler)) {
+      this.options.scrollToHandler(element);
+    } else if ((0, _isElement3.default)(element)) {
+      element.scrollIntoView();
+    }
+  }
+  /**
+   * Sets the options for the step, maps `when` to events, sets up buttons
+   * @param {Object} options The options for the step
+   */
+
+
+  setOptions(options = {}) {
+    this.options = options;
+    const when = this.options.when;
+    this.destroy();
+    this.id = this.options.id || `step-${uniqueId()}`;
+    (0, _forOwn3.default)(when, (handler, event) => {
+      this.on(event, handler, this);
+    });
+
+    this._setUpButtons();
+  }
+  /**
+   * Wraps `_show` and ensures `beforeShowPromise` resolves before calling show
+   * @return {*|Promise}
+   */
+
+
+  show() {
+    if ((0, _isFunction3.default)(this.options.beforeShowPromise)) {
+      const beforeShowPromise = this.options.beforeShowPromise();
+
+      if (!(0, _isUndefined3.default)(beforeShowPromise)) {
+        return beforeShowPromise.then(() => this._show());
       }
     }
-    /**
-     * Sets the options for the step, maps `when` to events, sets up buttons
-     * @param {Object} options The options for the step
-     */
 
-  }, {
-    key: "setOptions",
-    value: function setOptions() {
-      var _this3 = this;
+    this._show();
+  }
+  /**
+   * Determines button options prior to rendering
+   *
+   * @private
+   */
 
-      var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-      this.options = options;
-      var when = this.options.when;
-      this.destroy();
-      this.id = this.options.id || "step-".concat(uniqueId());
-      (0, _forOwn3.default)(when, function (handler, event) {
-        _this3.on(event, handler, _this3);
+
+  _setUpButtons() {
+    const buttons = this.options.buttons;
+
+    if (buttons) {
+      const buttonsAreDefault = (0, _isUndefined3.default)(buttons) || (0, _isEmpty3.default)(buttons);
+
+      if (buttonsAreDefault) {
+        this.options.buttons = [{
+          text: 'Next',
+          action: this.tour.next,
+          classes: 'btn'
+        }];
+      } else {
+        const buttonsAreObject = (0, _isPlainObject3.default)(buttons); // Can pass in an object which will assume a single button
+
+        if (buttonsAreObject) {
+          this.options.buttons = [this.options.buttons];
+        }
+      }
+    }
+  }
+  /**
+   * Triggers `before-show` then renders the element, shows it, sets up popper and triggers `show`
+   * @private
+   */
+
+
+  _show() {
+    this.trigger('before-show');
+
+    if (!this.el) {
+      this.render();
+    }
+
+    this.el.hidden = false; // We need to manually set styles for < IE11 support
+
+    this.el.style.display = 'block';
+    document.body.setAttribute('data-shepherd-step', this.id);
+    this.setupPopper();
+
+    if (this.options.scrollTo) {
+      setTimeout(() => {
+        this.scrollTo();
       });
-
-      this._setUpButtons();
     }
-    /**
-     * Wraps `_show` and ensures `beforeShowPromise` resolves before calling show
-     * @return {*|Promise}
-     */
 
-  }, {
-    key: "show",
-    value: function show() {
-      var _this4 = this;
+    this.trigger('show');
+  }
 
-      if ((0, _isFunction3.default)(this.options.beforeShowPromise)) {
-        var beforeShowPromise = this.options.beforeShowPromise();
+}
 
-        if (!(0, _isUndefined3.default)(beforeShowPromise)) {
-          return beforeShowPromise.then(function () {
-            return _this4._show();
-          });
-        }
-      }
-
-      this._show();
-    }
-    /**
-     * Determines button options prior to rendering
-     *
-     * @private
-     */
-
-  }, {
-    key: "_setUpButtons",
-    value: function _setUpButtons() {
-      var buttons = this.options.buttons;
-
-      if (buttons) {
-        var buttonsAreDefault = (0, _isUndefined3.default)(buttons) || (0, _isEmpty3.default)(buttons);
-
-        if (buttonsAreDefault) {
-          this.options.buttons = [{
-            text: 'Next',
-            action: this.tour.next,
-            classes: 'btn'
-          }];
-        } else {
-          var buttonsAreObject = (0, _isPlainObject3.default)(buttons); // Can pass in an object which will assume a single button
-
-          if (buttonsAreObject) {
-            this.options.buttons = [this.options.buttons];
-          }
-        }
-      }
-    }
-    /**
-     * Triggers `before-show` then renders the element, shows it, sets up popper and triggers `show`
-     * @private
-     */
-
-  }, {
-    key: "_show",
-    value: function _show() {
-      var _this5 = this;
-
-      this.trigger('before-show');
-
-      if (!this.el) {
-        this.render();
-      }
-
-      this.el.hidden = false; // We need to manually set styles for < IE11 support
-
-      this.el.style.display = 'block';
-      document.body.setAttribute('data-shepherd-step', this.id);
-      this.setupPopper();
-
-      if (this.options.scrollTo) {
-        setTimeout(function () {
-          _this5.scrollTo();
-        });
-      }
-
-      this.trigger('show');
-    }
-  }]);
-
-  return Step;
-}(_evented.Evented);
+exports.Step = Step;
 
 /***/ }),
 /* 8 */
@@ -1144,15 +1065,13 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * @private
  */
 function _setupAdvanceOnHandler(selector) {
-  var _this = this;
-
-  return function (e) {
-    if (_this.isOpen()) {
-      var targetIsEl = _this.el && e.target === _this.el;
-      var targetIsSelector = !(0, _isUndefined3.default)(selector) && e.target.matches(selector);
+  return e => {
+    if (this.isOpen()) {
+      const targetIsEl = this.el && e.target === this.el;
+      const targetIsSelector = !(0, _isUndefined3.default)(selector) && e.target.matches(selector);
 
       if (targetIsSelector || targetIsEl) {
-        _this.tour.next();
+        this.tour.next();
       }
     }
   };
@@ -1164,14 +1083,14 @@ function _setupAdvanceOnHandler(selector) {
 
 function bindAdvance() {
   // An empty selector matches the step element
-  var _parseShorthand = (0, _utils.parseShorthand)(this.options.advanceOn, ['selector', 'event']),
-      event = _parseShorthand.event,
-      selector = _parseShorthand.selector;
+  const _parseShorthand = (0, _utils.parseShorthand)(this.options.advanceOn, ['selector', 'event']),
+        event = _parseShorthand.event,
+        selector = _parseShorthand.selector;
 
-  var handler = _setupAdvanceOnHandler.call(this, selector); // TODO: this should also bind/unbind on show/hide
+  const handler = _setupAdvanceOnHandler.call(this, selector); // TODO: this should also bind/unbind on show/hide
 
 
-  var el = document.querySelector(selector);
+  const el = document.querySelector(selector);
 
   if (!(0, _isUndefined3.default)(selector) && el) {
     el.addEventListener(event, handler);
@@ -1179,7 +1098,7 @@ function bindAdvance() {
     document.body.addEventListener(event, handler, true);
   }
 
-  this.on('destroy', function () {
+  this.on('destroy', () => {
     return document.body.removeEventListener(event, handler, true);
   });
 }
@@ -1191,8 +1110,6 @@ function bindAdvance() {
 
 
 function bindButtonEvents(cfg, el) {
-  var _this2 = this;
-
   cfg.events = cfg.events || {};
 
   if (!(0, _isUndefined3.default)(cfg.action)) {
@@ -1200,19 +1117,17 @@ function bindButtonEvents(cfg, el) {
     cfg.events.click = cfg.action;
   }
 
-  (0, _forOwn3.default)(cfg.events, function (handler, event) {
+  (0, _forOwn3.default)(cfg.events, (handler, event) => {
     if ((0, _isString3.default)(handler)) {
-      var page = handler;
+      const page = handler;
 
-      handler = function handler() {
-        return _this2.tour.show(page);
-      };
+      handler = () => this.tour.show(page);
     }
 
     el.dataset.buttonEvent = true;
     el.addEventListener(event, handler); // Cleanup event listeners on destroy
 
-    _this2.on('destroy', function () {
+    this.on('destroy', () => {
       el.removeAttribute('data-button-event');
       el.removeEventListener(event, handler);
     });
@@ -1225,12 +1140,9 @@ function bindButtonEvents(cfg, el) {
 
 
 function bindCancelLink(link) {
-  var _this3 = this;
-
-  link.addEventListener('click', function (e) {
+  link.addEventListener('click', e => {
     e.preventDefault();
-
-    _this3.cancel();
+    this.cancel();
   });
 }
 /**
@@ -1240,10 +1152,8 @@ function bindCancelLink(link) {
 
 
 function bindMethods(methods) {
-  var _this4 = this;
-
-  methods.map(function (method) {
-    _this4[method] = _this4[method].bind(_this4);
+  methods.map(method => {
+    this[method] = this[method].bind(this);
   });
 }
 
@@ -1287,7 +1197,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * @return {HTMLElement} The element created from the passed HTML string
  */
 function createFromHTML(html) {
-  var el = document.createElement('div');
+  const el = document.createElement('div');
   el.innerHTML = html;
   return el.children[0];
 }
@@ -1307,8 +1217,8 @@ function parsePosition(position) {
     return null;
   }
 
-  var positionRe = /^(.+) (top|left|right|bottom|center)$/;
-  var matches = positionRe.exec(position);
+  const positionRe = /^(.+) (top|left|right|bottom|center)$/;
+  const matches = positionRe.exec(position);
 
   if (!matches) {
     return null;
@@ -1333,7 +1243,7 @@ function parseShorthand(obj, props) {
     return obj;
   }
 
-  var values = obj.split(' ');
+  const values = obj.split(' ');
   return (0, _zipObject3.default)(props, values);
 }
 /**
@@ -1346,9 +1256,9 @@ function setupPopper() {
     throw new Error('Using the attachment feature of Shepherd requires the Popper.js library');
   }
 
-  var opts = this.getAttachTo();
+  const opts = this.getAttachTo();
   opts.modifiers = opts.modifiers || {};
-  var attachment = opts.on || 'right';
+  let attachment = opts.on || 'right';
   opts.positionFixed = false;
 
   if ((0, _isUndefined3.default)(opts.element)) {
@@ -1363,7 +1273,7 @@ function setupPopper() {
 
   this.el.classList.add('shepherd-element');
 
-  var popperOpts = _mergePopperOptions.call(this, attachment, opts);
+  const popperOpts = _mergePopperOptions.call(this, attachment, opts);
 
   this.popper = new _popper2.default(opts.element, this.el, popperOpts);
   this.target = opts.element;
@@ -1399,7 +1309,8 @@ function _setupCenteredPopper(opts) {
   opts.modifiers = Object.assign({
     computeStyle: {
       enabled: true,
-      fn: function fn(data) {
+
+      fn(data) {
         data.styles = Object.assign({}, data.styles, {
           left: '50%',
           top: '50%',
@@ -1407,6 +1318,7 @@ function _setupCenteredPopper(opts) {
         });
         return data;
       }
+
     }
   }, opts.modifiers);
   opts.positionFixed = true;
@@ -2295,35 +2207,13 @@ var _bind = __webpack_require__(11);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-var Shepherd = new _evented.Evented();
+const Shepherd = new _evented.Evented();
 /**
  * Class representing the site tour
  * @extends {Evented}
  */
 
-var Tour =
-/*#__PURE__*/
-exports.Tour = function (_Evented) {
-  _inherits(Tour, _Evented);
-
+class Tour extends _evented.Evented {
   /**
    *
    * @param {Object} options The options for the tour
@@ -2331,31 +2221,25 @@ exports.Tour = function (_Evented) {
    * @param {Step[]} options.steps An array of Step instances to initialize the tour with
    * @returns {Tour}
    */
-  function Tour() {
-    var _this;
+  constructor(options = {}) {
+    super(options);
 
-    var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    _bind.bindMethods.call(this, ['back', 'cancel', 'complete', 'next']);
 
-    _classCallCheck(this, Tour);
+    this.options = options;
+    this.steps = this.options.steps || []; // Pass these events onto the global Shepherd object
 
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(Tour).call(this, options));
-
-    _bind.bindMethods.call(_assertThisInitialized(_assertThisInitialized(_this)), ['back', 'cancel', 'complete', 'next']);
-
-    _this.options = options;
-    _this.steps = _this.options.steps || []; // Pass these events onto the global Shepherd object
-
-    var events = ['active', 'cancel', 'complete', 'inactive', 'show', 'start'];
-    events.map(function (event) {
-      (function (e) {
-        _this.on(e, function (opts) {
+    const events = ['active', 'cancel', 'complete', 'inactive', 'show', 'start'];
+    events.map(event => {
+      (e => {
+        this.on(e, opts => {
           opts = opts || {};
-          opts.tour = _assertThisInitialized(_assertThisInitialized(_this));
+          opts.tour = this;
           Shepherd.trigger(e, opts);
         });
       })(event);
     });
-    return _possibleConstructorReturn(_this, _assertThisInitialized(_assertThisInitialized(_this)));
+    return this;
   }
   /**
    * Adds a new step to the tour
@@ -2367,262 +2251,239 @@ exports.Tour = function (_Evented) {
    */
 
 
-  _createClass(Tour, [{
-    key: "addStep",
-    value: function addStep(arg1, arg2) {
-      var name, step; // If we just have one argument, we can assume it is an object of step options, with an id
+  addStep(arg1, arg2) {
+    let name, step; // If we just have one argument, we can assume it is an object of step options, with an id
 
-      if ((0, _isUndefined3.default)(arg2)) {
-        step = arg1;
-      } else {
-        name = arg1;
-        step = arg2;
-      }
-
-      if (!(step instanceof _step.Step)) {
-        step = this.setupStep(step, name);
-      } else {
-        step.tour = this;
-      }
-
-      this.steps.push(step);
-      return step;
+    if ((0, _isUndefined3.default)(arg2)) {
+      step = arg1;
+    } else {
+      name = arg1;
+      step = arg2;
     }
-    /**
-     * Go to the previous step in the tour
-     */
 
-  }, {
-    key: "back",
-    value: function back() {
-      var index = this.steps.indexOf(this.currentStep);
-      this.show(index - 1, false);
+    if (!(step instanceof _step.Step)) {
+      step = this.setupStep(step, name);
+    } else {
+      step.tour = this;
     }
-    /**
-     * Calls done() triggering the 'cancel' event
-     * If `confirmCancel` is true, will show a window.confirm before cancelling
-     */
 
-  }, {
-    key: "cancel",
-    value: function cancel() {
-      if (this.options.confirmCancel) {
-        var cancelMessage = this.options.confirmCancelMessage || 'Are you sure you want to stop the tour?';
-        var stopTour = window.confirm(cancelMessage);
+    this.steps.push(step);
+    return step;
+  }
+  /**
+   * Go to the previous step in the tour
+   */
 
-        if (stopTour) {
-          this.done('cancel');
-        }
-      } else {
+
+  back() {
+    const index = this.steps.indexOf(this.currentStep);
+    this.show(index - 1, false);
+  }
+  /**
+   * Calls done() triggering the 'cancel' event
+   * If `confirmCancel` is true, will show a window.confirm before cancelling
+   */
+
+
+  cancel() {
+    if (this.options.confirmCancel) {
+      const cancelMessage = this.options.confirmCancelMessage || 'Are you sure you want to stop the tour?';
+      const stopTour = window.confirm(cancelMessage);
+
+      if (stopTour) {
         this.done('cancel');
       }
+    } else {
+      this.done('cancel');
     }
-    /**
-     * Calls done() triggering the `complete` event
-     */
+  }
+  /**
+   * Calls done() triggering the `complete` event
+   */
 
-  }, {
-    key: "complete",
-    value: function complete() {
-      this.done('complete');
+
+  complete() {
+    this.done('complete');
+  }
+  /**
+   * Called whenever the tour is cancelled or completed, basically anytime we exit the tour
+   * @param {String} event The event name to trigger
+   */
+
+
+  done(event) {
+    if (this.currentStep) {
+      this.currentStep.hide();
     }
-    /**
-     * Called whenever the tour is cancelled or completed, basically anytime we exit the tour
-     * @param {String} event The event name to trigger
-     */
 
-  }, {
-    key: "done",
-    value: function done(event) {
-      if (this.currentStep) {
-        this.currentStep.hide();
+    this.trigger(event);
+
+    if (Shepherd.activeTour) {
+      Shepherd.activeTour.steps.forEach(step => {
+        step.destroy();
+      });
+    }
+
+    Shepherd.activeTour = null;
+    document.body.classList.remove('shepherd-active');
+    this.trigger('inactive', {
+      tour: this
+    });
+  }
+  /**
+   * Gets the step from a given id
+   * @param {Number|String} id The id of the step to retrieve
+   * @return {Step} The step corresponding to the `id`
+   */
+
+
+  getById(id) {
+    return this.steps.find(step => {
+      return step.id === id;
+    });
+  }
+  /**
+   * Gets the current step
+   * @returns {Step|null}
+   */
+
+
+  getCurrentStep() {
+    return this.currentStep;
+  }
+  /**
+   * Go to the next step in the tour
+   * If we are at the end, call `complete`
+   */
+
+
+  next() {
+    const index = this.steps.indexOf(this.currentStep);
+
+    if (index === this.steps.length - 1) {
+      this.complete();
+    } else {
+      this.show(index + 1, true);
+    }
+  }
+  /**
+   * Removes the step from the tour
+   * @param {String} name The id for the step to remove
+   */
+
+
+  removeStep(name) {
+    const current = this.getCurrentStep(); // Find the step, destroy it and remove it from this.steps
+
+    this.steps.some((step, i) => {
+      if (step.id === name) {
+        if (step.isOpen()) {
+          step.hide();
+        }
+
+        step.destroy();
+        this.steps.splice(i, 1);
+        return true;
       }
+    });
 
-      this.trigger(event);
+    if (current && current.id === name) {
+      this.currentStep = undefined; // If we have steps left, show the first one, otherwise just cancel the tour
 
-      if (Shepherd.activeTour) {
-        Shepherd.activeTour.steps.forEach(function (step) {
-          step.destroy();
-        });
-      }
+      this.steps.length ? this.show(0) : this.cancel();
+    }
+  }
+  /**
+   * Setup a new step object
+   * @param {Object} stepOptions The object describing the options for the step
+   * @param {String|Number} name The string or number to use as the `id` for the step
+   * @return {Step} The step instance
+   */
 
-      Shepherd.activeTour = null;
-      document.body.classList.remove('shepherd-active');
-      this.trigger('inactive', {
+
+  setupStep(stepOptions, name) {
+    if ((0, _isString3.default)(name) || (0, _isNumber3.default)(name)) {
+      stepOptions.id = name.toString();
+    }
+
+    stepOptions = Object.assign({}, this.options.defaults, stepOptions);
+    return new _step.Step(this, stepOptions);
+  }
+  /**
+   * Show a specific step in the tour
+   * @param {Number|String} key The key to look up the step by
+   * @param {Boolean} forward True if we are going forward, false if backward
+   */
+
+
+  show(key = 0, forward = true) {
+    this._setupActiveTour();
+
+    const step = (0, _isString3.default)(key) ? this.getById(key) : this.steps[key];
+
+    if (!step) {
+      return;
+    }
+
+    const shouldSkipStep = (0, _isFunction3.default)(step.options.showOn) && !step.options.showOn(); // If `showOn` returns false, we want to skip the step, otherwise, show the step like normal
+
+    if (shouldSkipStep) {
+      this._skipStep(step, forward);
+    } else {
+      this.trigger('show', {
+        step,
+        previous: this.currentStep
+      });
+      this.currentStep = step;
+      step.show();
+    }
+  }
+  /**
+   * Start the tour
+   */
+
+
+  start() {
+    this.trigger('start');
+    this.currentStep = null;
+    this.next();
+  }
+  /**
+   * If we have a currentStep, the tour is active, so just hide the step and remain active.
+   * Otherwise, make the tour active.
+   * @private
+   */
+
+
+  _setupActiveTour() {
+    if (this.currentStep) {
+      this.currentStep.hide();
+    } else {
+      document.body.classList.add('shepherd-active');
+      this.trigger('active', {
         tour: this
       });
     }
-    /**
-     * Gets the step from a given id
-     * @param {Number|String} id The id of the step to retrieve
-     * @return {Step} The step corresponding to the `id`
-     */
 
-  }, {
-    key: "getById",
-    value: function getById(id) {
-      return this.steps.find(function (step) {
-        return step.id === id;
-      });
-    }
-    /**
-     * Gets the current step
-     * @returns {Step|null}
-     */
+    Shepherd.activeTour = this;
+  }
+  /**
+   * Called when `showOn` evaluates to false, to skip the step
+   * @param {Step} step The step to skip
+   * @param {Boolean} forward True if we are going forward, false if backward
+   * @private
+   */
 
-  }, {
-    key: "getCurrentStep",
-    value: function getCurrentStep() {
-      return this.currentStep;
-    }
-    /**
-     * Go to the next step in the tour
-     * If we are at the end, call `complete`
-     */
 
-  }, {
-    key: "next",
-    value: function next() {
-      var index = this.steps.indexOf(this.currentStep);
+  _skipStep(step, forward) {
+    const index = this.steps.indexOf(step);
+    const nextIndex = forward ? index + 1 : index - 1;
+    this.show(nextIndex, forward);
+  }
 
-      if (index === this.steps.length - 1) {
-        this.complete();
-      } else {
-        this.show(index + 1, true);
-      }
-    }
-    /**
-     * Removes the step from the tour
-     * @param {String} name The id for the step to remove
-     */
+}
 
-  }, {
-    key: "removeStep",
-    value: function removeStep(name) {
-      var _this2 = this;
-
-      var current = this.getCurrentStep(); // Find the step, destroy it and remove it from this.steps
-
-      this.steps.some(function (step, i) {
-        if (step.id === name) {
-          if (step.isOpen()) {
-            step.hide();
-          }
-
-          step.destroy();
-
-          _this2.steps.splice(i, 1);
-
-          return true;
-        }
-      });
-
-      if (current && current.id === name) {
-        this.currentStep = undefined; // If we have steps left, show the first one, otherwise just cancel the tour
-
-        this.steps.length ? this.show(0) : this.cancel();
-      }
-    }
-    /**
-     * Setup a new step object
-     * @param {Object} stepOptions The object describing the options for the step
-     * @param {String|Number} name The string or number to use as the `id` for the step
-     * @return {Step} The step instance
-     */
-
-  }, {
-    key: "setupStep",
-    value: function setupStep(stepOptions, name) {
-      if ((0, _isString3.default)(name) || (0, _isNumber3.default)(name)) {
-        stepOptions.id = name.toString();
-      }
-
-      stepOptions = Object.assign({}, this.options.defaults, stepOptions);
-      return new _step.Step(this, stepOptions);
-    }
-    /**
-     * Show a specific step in the tour
-     * @param {Number|String} key The key to look up the step by
-     * @param {Boolean} forward True if we are going forward, false if backward
-     */
-
-  }, {
-    key: "show",
-    value: function show() {
-      var key = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-      var forward = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
-
-      this._setupActiveTour();
-
-      var step = (0, _isString3.default)(key) ? this.getById(key) : this.steps[key];
-
-      if (!step) {
-        return;
-      }
-
-      var shouldSkipStep = (0, _isFunction3.default)(step.options.showOn) && !step.options.showOn(); // If `showOn` returns false, we want to skip the step, otherwise, show the step like normal
-
-      if (shouldSkipStep) {
-        this._skipStep(step, forward);
-      } else {
-        this.trigger('show', {
-          step: step,
-          previous: this.currentStep
-        });
-        this.currentStep = step;
-        step.show();
-      }
-    }
-    /**
-     * Start the tour
-     */
-
-  }, {
-    key: "start",
-    value: function start() {
-      this.trigger('start');
-      this.currentStep = null;
-      this.next();
-    }
-    /**
-     * If we have a currentStep, the tour is active, so just hide the step and remain active.
-     * Otherwise, make the tour active.
-     * @private
-     */
-
-  }, {
-    key: "_setupActiveTour",
-    value: function _setupActiveTour() {
-      if (this.currentStep) {
-        this.currentStep.hide();
-      } else {
-        document.body.classList.add('shepherd-active');
-        this.trigger('active', {
-          tour: this
-        });
-      }
-
-      Shepherd.activeTour = this;
-    }
-    /**
-     * Called when `showOn` evaluates to false, to skip the step
-     * @param {Step} step The step to skip
-     * @param {Boolean} forward True if we are going forward, false if backward
-     * @private
-     */
-
-  }, {
-    key: "_skipStep",
-    value: function _skipStep(step, forward) {
-      var index = this.steps.indexOf(step);
-      var nextIndex = forward ? index + 1 : index - 1;
-      this.show(nextIndex, forward);
-    }
-  }]);
-
-  return Tour;
-}(_evented.Evented);
-
+exports.Tour = Tour;
 exports.Shepherd = Shepherd;
 
 /***/ }),
